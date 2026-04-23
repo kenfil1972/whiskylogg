@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17110d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Whiskylogg v1.6</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Premium Spirits Journal</div>
+        <h1>Whiskylogg</h1>
+      </div>
+      <button id="backupBtn" class="ghost">Backup</button>
+    </header>
+
+    <main>
+      <section class="view active" data-view="home">
+        <div class="card hero">
+          <div class="eyebrow">Oversikt</div>
+          <h2>Startside</h2>
+          <p>Bibliotek, flasker, vektlogikk, smakinger og verdioversikt.</p>
+        </div>
+
+        <div class="grid two">
+          <button class="card action" data-go="library"><span>📚</span><strong>Bibliotek</strong><small>Grunndata for flasketyper</small></button>
+          <button class="card action" data-go="add-bottle"><span>➕</span><strong>Ny flaske</strong><small>Registrer kjøp med batch/flaske nr</small></button>
+          <button class="card action" data-go="bottles"><span>🥃</span><strong>Mine flasker</strong><small>Beholdning, veiing og verdi</small></button>
+          <button class="card action" data-go="tastings"><span>📝</span><strong>Smakinger</strong><small>Snittscore per flaske</small></button>
+        </div>
+
+        <div class="grid four">
+          <div class="card stat"><div class="label">Total kost</div><div class="value" id="homeCost">0 kr</div></div>
+          <div class="card stat"><div class="label">Total volum</div><div class="value" id="homeVolume">0 ml</div></div>
+          <div class="card stat"><div class="label">Flasker</div><div class="value" id="homeBottles">0</div></div>
+          <div class="card stat"><div class="label">Smakinger</div><div class="value" id="homeTastings">0</div></div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="section-head"><h3>Beste kjøp</h3></div>
+            <div id="bestValueList" class="list"></div>
+          </div>
+          <div class="card">
+            <div class="section-head"><h3>Lav beholdning</h3></div>
+            <div id="lowStockList" class="list"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-head"><h3>Sist smakt</h3></div>
+          <div id="recentList" class="list"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="library">
+        <div class="card themed">
+          <h2>Bibliotek</h2>
+          <p>Tom vekt kan være tom eller TBA. Hvis du bare kjenner full vekt, beregnes tom vekt automatisk fra full vekt − volum × egenvekt.</p>
+        </div>
+
+        <form id="baseForm" class="card form">
+          <input type="hidden" name="editId">
+          <div class="grid two">
+            <label>Navn<input name="name" required placeholder="Woodford Reserve Double Oaked"></label>
+            <label>Destilleri / produsent<input name="distillery" placeholder="Brown-Forman"></label>
+          </div>
+          <div class="grid three">
+            <label>Type<select name="type" id="typeSelect"></select></label>
+            <label>ABV %<input name="abv" type="number" step="0.1" placeholder="43.2"></label>
+            <label>Volum ml<input name="volume" type="number" value="700"></label>
+          </div>
+          <div class="grid three">
+            <label>Full vekt g<input name="fullWeight" type="number" placeholder="1525"></label>
+            <label>Tom vekt g<input name="emptyWeight" type="text" placeholder="TBA eller tom"></label>
+            <label>Egenvekt g/ml<input name="density" type="number" step="0.001" placeholder="0.94"></label>
+          </div>
+          <div class="hint">Hvis tom vekt er ukjent, la feltet stå tomt eller skriv TBA. Har du full vekt, volum og egenvekt, regnes tom vekt ut automatisk.</div>
+          <div class="grid two">
+            <label>Region / land<input name="region" placeholder="Kentucky, USA"></label>
+            <label>Notat<textarea name="notes" rows="3" placeholder="Fast info om denne typen"></textarea></label>
+          </div>
+          <div class="grid two">
+            <button class="primary" type="submit" id="baseSaveBtn">Lagre grunndata</button>
+            <button class="ghost hidden" type="button" id="baseCancelBtn">Avbryt</button>
+          </div>
+        </form>
+
+        <div class="card">
+          <div class="section-head"><h3>Registrerte typer</h3><input id="baseSearch" class="search" placeholder="Søk"></div>
+          <div id="baseList" class="list"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="add-bottle">
+        <div class="card themed">
+          <h2>Ny flaske</h2>
+          <p>Velg grunndata og registrer batch, flaske nr, pris og eventuell nåværende vekt.</p>
+        </div>
+
+        <form id="bottleForm" class="card form">
+          <input type="hidden" name="editId">
+          <label>Type fra bibliotek<select name="baseId" id="basePick"></select></label>
+          <div class="grid three">
+            <label>Batch no.<input name="batchNo" placeholder="23A"></label>
+            <label>Flaske no.<input name="bottleNo" placeholder="2"></label>
+            <label>Pris kr<input name="price" type="number" placeholder="699"></label>
+          </div>
+          <div class="grid two">
+            <label>Kjøpssted<input name="purchasePlace" placeholder="Vinmonopolet"></label>
+            <label>Kjøpsdato<input name="purchaseDate" type="date"></label>
+          </div>
+          <div class="grid two">
+            <label>Nåværende vekt g<input name="currentWeight" type="number" placeholder="1163"></label>
+            <label>Kommentar<textarea name="notes" rows="2" placeholder="Info om akkurat denne flasken"></textarea></label>
+          </div>
+          <div class="grid two">
+            <button class="primary" type="submit" id="bottleSaveBtn">Lagre flaske</button>
+            <button class="ghost hidden" type="button" id="bottleCancelBtn">Avbryt</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="view" data-view="bottles">
+        <div class="card themed">
+          <h2>Mine flasker</h2>
+          <p>Volum regnes fra veiing når full og tom vekt kan bestemmes. Ellers brukes smakelogg som reserve.</p>
+        </div>
+
+        <div class="card">
+          <div class="section-head"><h3>Flaskeliste</h3><input id="bottleSearch" class="search" placeholder="Søk navn, batch eller flaske"></div>
+          <div id="bottleList" class="list"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="tastings">
+        <div class="card themed">
+          <h2>Smakinger</h2>
+          <p>Gjennomsnittet av alle vurderinger er gjeldende score på flasken.</p>
+        </div>
+
+        <form id="tastingForm" class="card form">
+          <input type="hidden" name="editId">
+          <div class="grid three">
+            <label>Flaske<select name="bottleId" id="bottlePick"></select></label>
+            <label>Dato<input name="date" type="date"></label>
+            <label>Drukket ml<input name="ml" type="number" value="20"></label>
+          </div>
+          <div class="grid four">
+            <label>Nese<input name="nose" type="number" min="1" max="10" value="7"></label>
+            <label>Smak<input name="palate" type="number" min="1" max="10" value="7"></label>
+            <label>Finish<input name="finish" type="number" min="1" max="10" value="7"></label>
+            <label>Helhet<input name="balance" type="number" min="1" max="10" value="7"></label>
+          </div>
+          <label>Notat<textarea name="notes" rows="3" placeholder="Kort smaksnotat"></textarea></label>
+          <div class="grid two">
+            <button class="primary" type="submit" id="tastingSaveBtn">Lagre smaking</button>
+            <button class="ghost hidden" type="button" id="tastingCancelBtn">Avbryt</button>
+          </div>
+        </form>
+
+        <div class="card">
+          <div class="section-head"><h3>Historikk</h3></div>
+          <div id="tastingList" class="list"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="backup">
+        <div class="card themed">
+          <h2>Backup</h2>
+          <p>Eksporter, importer eller nullstill data.</p>
+        </div>
+
+        <div class="card form">
+          <button id="exportBtn" class="primary" type="button">Eksporter backup (.json)</button>
+          <label>Importer backup<input id="importInput" type="file" accept="application/json"></label>
+          <button id="seedBtn" class="ghost" type="button">Legg inn eksempler</button>
+          <button id="resetBtn" class="danger" type="button">Nullstill all data</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="nav">
+      <button class="navbtn active" data-go="home">Hjem</button>
+      <button class="navbtn" data-go="library">Bibliotek</button>
+      <button class="navbtn" data-go="add-bottle">Ny flaske</button>
+      <button class="navbtn" data-go="bottles">Flasker</button>
+      <button class="navbtn" data-go="tastings">Smakinger</button>
+    </nav>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
