@@ -1,1 +1,0 @@
-console.log('Whiskylogg v1.6 loaded');
