@@ -1,1 +1,0 @@
-console.log('v1.7 loaded');
